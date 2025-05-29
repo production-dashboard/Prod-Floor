@@ -3,83 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <title>Production Floor Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
-      padding: 0;
-      overflow: hidden;
       font-family: Arial, sans-serif;
-      font-size: 10px;
-      transform: scale(0.85);
-      transform-origin: top left;
+      text-align: center;
+      background-color: #fff;
     }
 
     h1 {
-      text-align: center;
-      margin: 20px 0 10px;
+      font-size: 2.2vw;
+      margin: 1vw 0;
     }
 
     table {
-      border-collapse: collapse;
       width: 100vw;
       height: 100vh;
+      border-collapse: collapse;
       table-layout: fixed;
+      font-size: 0.85vw;
     }
 
     th, td {
       border: 1px solid #ccc;
-      padding: 4px;
+      padding: 0.4vw;
       text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-
-    /* Wrap headers C1 to Z1 */
-    thead tr th:nth-child(n+3) {
-      white-space: normal;
       word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     /* Column A: SL No */
     thead th:nth-child(1),
     tbody td:nth-child(1) {
-      width: 5%;
+      width: 3%;
     }
 
-    /* Column B: Work Operations - wide and visible */
+    /* Column B: Work Operations */
     thead th:nth-child(2),
     tbody td:nth-child(2) {
-      width: 22%;
+      width: 28%;
       text-align: left;
       white-space: nowrap;
       overflow: visible;
     }
 
-    /* Column C onwards: standard widths */
-    thead th:nth-child(n+3),
-    tbody td:nth-child(n+3) {
-      min-width: 60px;
-      max-width: 100px;
+    /* Columns C to Z: wrap headers */
+    thead th:nth-child(n+3) {
+      white-space: normal;
     }
 
-    /* Error box */
-    #error {
-      color: red;
-      background-color: #f2f2ff;
-      padding: 20px;
-      margin: 20px;
-      text-align: center;
-      font-weight: bold;
-      border: 1px solid #ccc;
-      display: none;
+    /* Hide scrollbars completely */
+    html, body {
+      overflow: hidden;
+    }
+
+    /* Data container */
+    #data {
+      width: 100vw;
+      height: 90vh;
+    }
+
+    /* Dashboard title */
+    #title {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1vw;
+    }
+
+    #title img {
+      height: 2.5vw;
     }
   </style>
 </head>
 <body>
-  <h1>📊 Production Floor Dashboard</h1>
-  <div id="error">❌ Failed to load data</div>
+  <div id="title">
+    <img src="https://img.icons8.com/ios-filled/50/000000/combo-chart--v1.png" alt="Icon">
+    <h1>Production Floor Dashboard</h1>
+  </div>
   <div id="data"></div>
 
   <script>
@@ -94,24 +96,23 @@
         .then(dataText => {
           const json = JSON.parse(dataText.substring(47).slice(0, -2));
           const container = document.getElementById("data");
-          container.innerHTML = "";
-
           const table = document.createElement("table");
+          container.innerHTML = "";
+          container.appendChild(table);
 
+          // Create headers
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
-
           json.table.cols.forEach(col => {
             const th = document.createElement("th");
             th.textContent = col.label;
             headerRow.appendChild(th);
           });
-
           thead.appendChild(headerRow);
           table.appendChild(thead);
 
+          // Create body
           const tbody = document.createElement("tbody");
-
           json.table.rows.forEach(row => {
             const tr = document.createElement("tr");
             row.c.forEach(cell => {
@@ -121,17 +122,18 @@
             });
             tbody.appendChild(tr);
           });
-
           table.appendChild(tbody);
-          container.appendChild(table);
         })
-        .catch(() => {
-          document.getElementById("error").style.display = "block";
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          document.getElementById("data").innerHTML = `
+            <div style="color: red; font-size: 2vw;">❌ Failed to load data</div>`;
         });
     }
 
+    // Initial load and refresh every 30 seconds
     fetchSheetData();
-    setInterval(fetchSheetData, 30000); // Auto-refresh every 30 sec
+    setInterval(fetchSheetData, 30000);
   </script>
 </body>
 </html>
