@@ -7,72 +7,68 @@
   <style>
     body {
       margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      overflow: hidden;
       background-color: white;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 2.5vw;
-      margin-top: 1vh;
-    }
-
-    .icon {
-      text-align: center;
-      font-size: 4vw;
-      margin-bottom: 1vh;
-    }
-
-    #data {
+    .table-wrapper {
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 92vh;
+      align-items: flex-start;
+      padding: 0;
       overflow: hidden;
     }
 
     table {
       border-collapse: collapse;
+      font-size: 0.9vw;
       table-layout: fixed;
-      width: 98vw;
-      height: 90vh;
-      font-size: 0.85vw;
+      width: 95vw;
+      max-width: 100%;
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid #ccc;
-      text-align: center;
-      padding: 0.5vh 0.5vw;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      padding: 5px;
+      text-align: left;
+      vertical-align: top;
+      word-wrap: break-word;
     }
 
     th {
-      font-weight: bold;
       background-color: #e0e0e0;
-      word-wrap: break-word;
-      white-space: normal;
     }
 
-    td.work-operation {
+    td:nth-child(2) {
       white-space: nowrap;
-      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+
+    tr td:first-child {
+      min-width: 25px;
+      text-align: center;
+    }
+
+    .title-row {
+      font-size: 1vw;
+      font-weight: bold;
+      text-align: center;
+      padding: 5px 0;
     }
   </style>
 </head>
 <body>
-  <div class="icon">
-    📊
+  <div class="table-wrapper">
+    <table id="data"></table>
   </div>
-  <h1>Production Floor Dashboard</h1>
-  <div id="data">
-    <span>Loading data...</span>
-  </div>
+
   <script>
     function fetchSheetData() {
-      const sheetID = "1_Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
+      const sheetID = "1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
       const sheetName = "Sheet1";
       const query = encodeURIComponent("SELECT *");
       const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
@@ -81,42 +77,41 @@
         .then((res) => res.text())
         .then((dataText) => {
           const json = JSON.parse(dataText.substring(47).slice(0, -2));
-          const container = document.getElementById("data");
-          const table = document.createElement("table");
-          container.innerHTML = "";
+          const table = document.getElementById("data");
+          table.innerHTML = "";
 
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
+
           json.table.cols.forEach((col) => {
             const th = document.createElement("th");
-            th.textContent = col.label;
+            th.innerText = col.label;
             headerRow.appendChild(th);
           });
+
           thead.appendChild(headerRow);
           table.appendChild(thead);
 
           const tbody = document.createElement("tbody");
           json.table.rows.forEach((row) => {
             const tr = document.createElement("tr");
-            row.c.forEach((cell, idx) => {
+            row.c.forEach((cell, index) => {
               const td = document.createElement("td");
               td.innerText = cell ? cell.v : "";
-              if (idx === 1) td.classList.add("work-operation");
               tr.appendChild(td);
             });
             tbody.appendChild(tr);
           });
+
           table.appendChild(tbody);
-          container.appendChild(table);
         })
-        .catch((err) => {
-          document.getElementById("data").innerHTML =
-            `<div style="padding:20px;background:#f2f3ff;border:1px solid #ccc;color:red;font-size:1.5vw;text-align:center;">❌ Failed to load data</div>`;
+        .catch((error) => {
+          console.error("Failed to fetch data", error);
         });
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 30000);
+    setInterval(fetchSheetData, 30000); // Auto-refresh every 30 seconds
   </script>
 </body>
 </html>
