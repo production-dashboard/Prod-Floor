@@ -5,63 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Production Floor Dashboard</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background-color: #ffffff;
       font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
+      overflow-x: auto;
     }
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      padding: 10px;
-      box-sizing: border-box;
-      height: 100%;
-      width: 100%;
-    }
+
     h1 {
       text-align: center;
-      color: #000000;
-      margin-bottom: 20px;
-      font-size: 2.5vw;
+      margin-top: 20px;
     }
-    #data {
-      width: 100%;
-      overflow: auto;
+
+    .container {
+      width: 100vw;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-x: auto;
     }
+
     table {
-      border-collapse: collapse;
       width: 100%;
-      font-size: 1.2vw;
+      border-collapse: collapse;
+      table-layout: auto;
+      font-size: 0.9em;
     }
+
     th, td {
-      border: 1px solid #999;
+      border: 1px solid #ccc;
       padding: 8px;
-      text-align: left;
+      text-align: center;
+      white-space: nowrap;
     }
+
     th {
       background-color: #d3d3d3;
     }
+
     .error {
+      background-color: #f0f0ff;
       color: red;
-      font-size: 1.5vw;
-      margin-top: 20px;
-      background: #f1f1ff;
-      padding: 10px;
-      border-radius: 5px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #ccc;
+      margin: 20px;
     }
   </style>
 </head>
 <body>
+  <h1>
+    <img src="https://img.icons8.com/color/48/000000/combo-chart--v1.png" alt="Dashboard Icon" width="40" style="vertical-align:middle;" />
+    Production Floor Dashboard
+  </h1>
   <div class="container">
-    <h1>📊 Production Floor Dashboard</h1>
-    <div id="data"></div>
-    <div id="error" class="error" style="display: none;">❌ Failed to load data</div>
+    <div id="data">
+      <div class="error">⏳ Loading data...</div>
+    </div>
   </div>
 
   <script>
@@ -79,15 +80,14 @@
             const container = document.getElementById("data");
             const table = document.createElement("table");
             container.innerHTML = "";
+
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
-
             json.table.cols.forEach(col => {
               const th = document.createElement("th");
               th.textContent = col.label;
               headerRow.appendChild(th);
             });
-
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
@@ -101,23 +101,19 @@
               });
               tbody.appendChild(tr);
             });
-
             table.appendChild(tbody);
             container.appendChild(table);
-            document.getElementById("error").style.display = "none";
-          } catch (e) {
-            showError();
+          } catch (error) {
+            document.getElementById("data").innerHTML = `<div class='error'>❌ Failed to load data</div>`;
           }
         })
-        .catch(showError);
-    }
-
-    function showError() {
-      document.getElementById("error").style.display = "block";
+        .catch(() => {
+          document.getElementById("data").innerHTML = `<div class='error'>❌ Failed to load data</div>`;
+        });
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 60000); // Refresh every 60 seconds
+    setInterval(fetchSheetData, 60000);
   </script>
 </body>
 </html>
