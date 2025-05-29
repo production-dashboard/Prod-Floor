@@ -10,7 +10,7 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
       font-size: 10px;
-      transform: scale(0.85); /* Adjust scale for TV/laptop display */
+      transform: scale(0.85);
       transform-origin: top left;
     }
 
@@ -31,8 +31,9 @@
       padding: 4px;
       text-align: center;
       overflow: hidden;
-      white-space: nowrap;
       text-overflow: ellipsis;
+      white-space: nowrap;
+      box-sizing: border-box;
     }
 
     /* Wrap headers C1 to Z1 */
@@ -41,14 +42,29 @@
       word-wrap: break-word;
     }
 
-    /* Allow full visibility of Work Operations in column B */
-    tbody td:nth-child(2), thead th:nth-child(2) {
-      white-space: nowrap;
-      overflow: visible;
-      text-align: left;
+    /* Column A: SL No */
+    thead th:nth-child(1),
+    tbody td:nth-child(1) {
+      width: 5%;
     }
 
-    /* Style the error box */
+    /* Column B: Work Operations - wide and visible */
+    thead th:nth-child(2),
+    tbody td:nth-child(2) {
+      width: 22%;
+      text-align: left;
+      white-space: nowrap;
+      overflow: visible;
+    }
+
+    /* Column C onwards: standard widths */
+    thead th:nth-child(n+3),
+    tbody td:nth-child(n+3) {
+      min-width: 60px;
+      max-width: 100px;
+    }
+
+    /* Error box */
     #error {
       color: red;
       background-color: #f2f2ff;
@@ -81,23 +97,6 @@
           container.innerHTML = "";
 
           const table = document.createElement("table");
-
-          // Set column widths
-          const colgroup = document.createElement("colgroup");
-          const colA = document.createElement("col");
-          colA.style.width = "5%";
-          const colB = document.createElement("col");
-          colB.style.width = "auto"; // Adjust to content
-          colgroup.appendChild(colA);
-          colgroup.appendChild(colB);
-
-          for (let i = 0; i < 24; i++) {
-            const col = document.createElement("col");
-            col.style.width = "4%";
-            colgroup.appendChild(col);
-          }
-
-          table.appendChild(colgroup);
 
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
@@ -132,7 +131,7 @@
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 30000); // Auto-refresh every 30 seconds
+    setInterval(fetchSheetData, 30000); // Auto-refresh every 30 sec
   </script>
 </body>
 </html>
