@@ -7,64 +7,67 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
-      background: #fff;
+      background-color: #fff;
       color: #000;
-      overflow-x: auto;
+      overflow: hidden;
     }
-
     h1 {
       text-align: center;
-      margin-top: 20px;
+      margin: 20px 0 10px;
     }
-
+    .logo {
+      display: block;
+      margin: 0 auto 10px;
+      width: 40px;
+    }
     .container {
-      width: 100vw;
-      padding: 10px;
-      box-sizing: border-box;
-      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: calc(100vh - 100px);
+      padding: 0 10px;
     }
-
+    .scroll-wrapper {
+      overflow: auto;
+      max-height: 100%;
+      max-width: 100%;
+    }
     table {
-      width: 100%;
       border-collapse: collapse;
-      table-layout: auto;
-      font-size: 0.9em;
+      width: 100%;
+      table-layout: fixed;
+      font-size: calc(10px + 0.3vw);
     }
-
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-      white-space: nowrap;
+      border: 1px solid #999;
+      padding: 6px 8px;
+      text-align: left;
+      word-wrap: break-word;
     }
-
     th {
       background-color: #d3d3d3;
     }
-
     .error {
-      background-color: #f0f0ff;
       color: red;
-      padding: 20px;
+      font-weight: bold;
       text-align: center;
-      border: 1px solid #ccc;
-      margin: 20px;
+      background: #f1f1ff;
+      padding: 12px;
+      margin: 10px auto;
+      max-width: 600px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>
-    <img src="https://img.icons8.com/color/48/000000/combo-chart--v1.png" alt="Dashboard Icon" width="40" style="vertical-align:middle;" />
-    Production Floor Dashboard
-  </h1>
+  <img src="https://img.icons8.com/ios-filled/50/000000/combo-chart.png" alt="Logo" class="logo">
+  <h1>Production Floor Dashboard</h1>
   <div class="container">
-    <div id="data">
-      <div class="error">⏳ Loading data...</div>
+    <div class="scroll-wrapper">
+      <div id="data"></div>
     </div>
   </div>
-
   <script>
     function fetchSheetData() {
       const sheetID = "1_Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
@@ -75,40 +78,38 @@
       fetch(url)
         .then(response => response.text())
         .then(dataText => {
-          try {
-            const json = JSON.parse(dataText.substring(47).slice(0, -2));
-            const container = document.getElementById("data");
-            const table = document.createElement("table");
-            container.innerHTML = "";
+          const json = JSON.parse(dataText.substring(47).slice(0, -2));
+          const container = document.getElementById("data");
+          const table = document.createElement("table");
+          container.innerHTML = "";
 
-            const thead = document.createElement("thead");
-            const headerRow = document.createElement("tr");
-            json.table.cols.forEach(col => {
-              const th = document.createElement("th");
-              th.textContent = col.label;
-              headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
+          const thead = document.createElement("thead");
+          const headerRow = document.createElement("tr");
+          json.table.cols.forEach(col => {
+            const th = document.createElement("th");
+            th.textContent = col.label;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
 
-            const tbody = document.createElement("tbody");
-            json.table.rows.forEach(row => {
-              const tr = document.createElement("tr");
-              row.c.forEach(cell => {
-                const td = document.createElement("td");
-                td.textContent = cell ? cell.v : "";
-                tr.appendChild(td);
-              });
-              tbody.appendChild(tr);
+          const tbody = document.createElement("tbody");
+          json.table.rows.forEach(row => {
+            const tr = document.createElement("tr");
+            row.c.forEach(cell => {
+              const td = document.createElement("td");
+              td.textContent = cell ? cell.v : "";
+              tr.appendChild(td);
             });
-            table.appendChild(tbody);
-            container.appendChild(table);
-          } catch (error) {
-            document.getElementById("data").innerHTML = `<div class='error'>❌ Failed to load data</div>`;
-          }
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          container.appendChild(table);
         })
-        .catch(() => {
-          document.getElementById("data").innerHTML = `<div class='error'>❌ Failed to load data</div>`;
+        .catch(error => {
+          const container = document.getElementById("data");
+          container.innerHTML = `<div class='error'>❌ Failed to load data</div>`;
+          console.error("Data fetch error:", error);
         });
     }
 
