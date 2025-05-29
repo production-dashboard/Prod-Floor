@@ -1,89 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Production Floor Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #fff;
+      overflow: hidden;
+      background-color: white;
     }
 
     h1 {
-      font-size: 2.2vw;
-      margin: 1vw 0;
+      text-align: center;
+      font-size: 2.5vw;
+      margin-top: 1vh;
+    }
+
+    .icon {
+      text-align: center;
+      font-size: 4vw;
+      margin-bottom: 1vh;
+    }
+
+    #data {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 92vh;
+      overflow: hidden;
     }
 
     table {
-      width: 100vw;
-      height: 100vh;
       border-collapse: collapse;
       table-layout: fixed;
+      width: 98vw;
+      height: 90vh;
       font-size: 0.85vw;
     }
 
     th, td {
       border: 1px solid #ccc;
-      padding: 0.4vw;
       text-align: center;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-
-    /* Column A: SL No */
-    thead th:nth-child(1),
-    tbody td:nth-child(1) {
-      width: 3%;
-    }
-
-    /* Column B: Work Operations */
-    thead th:nth-child(2),
-    tbody td:nth-child(2) {
-      width: 28%;
-      text-align: left;
+      padding: 0.5vh 0.5vw;
+      overflow: hidden;
       white-space: nowrap;
-      overflow: visible;
+      text-overflow: ellipsis;
     }
 
-    /* Columns C to Z: wrap headers */
-    thead th:nth-child(n+3) {
+    th {
+      font-weight: bold;
+      background-color: #e0e0e0;
+      word-wrap: break-word;
       white-space: normal;
     }
 
-    /* Hide scrollbars completely */
-    html, body {
-      overflow: hidden;
-    }
-
-    /* Data container */
-    #data {
-      width: 100vw;
-      height: 90vh;
-    }
-
-    /* Dashboard title */
-    #title {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1vw;
-    }
-
-    #title img {
-      height: 2.5vw;
+    td.work-operation {
+      white-space: nowrap;
+      text-align: left;
     }
   </style>
 </head>
 <body>
-  <div id="title">
-    <img src="https://img.icons8.com/ios-filled/50/000000/combo-chart--v1.png" alt="Icon">
-    <h1>Production Floor Dashboard</h1>
+  <div class="icon">
+    📊
   </div>
-  <div id="data"></div>
-
+  <h1>Production Floor Dashboard</h1>
+  <div id="data">
+    <span>Loading data...</span>
+  </div>
   <script>
     function fetchSheetData() {
       const sheetID = "1_Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
@@ -92,18 +78,16 @@
       const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
       fetch(url)
-        .then(response => response.text())
-        .then(dataText => {
+        .then((res) => res.text())
+        .then((dataText) => {
           const json = JSON.parse(dataText.substring(47).slice(0, -2));
           const container = document.getElementById("data");
           const table = document.createElement("table");
           container.innerHTML = "";
-          container.appendChild(table);
 
-          // Create headers
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
-          json.table.cols.forEach(col => {
+          json.table.cols.forEach((col) => {
             const th = document.createElement("th");
             th.textContent = col.label;
             headerRow.appendChild(th);
@@ -111,27 +95,26 @@
           thead.appendChild(headerRow);
           table.appendChild(thead);
 
-          // Create body
           const tbody = document.createElement("tbody");
-          json.table.rows.forEach(row => {
+          json.table.rows.forEach((row) => {
             const tr = document.createElement("tr");
-            row.c.forEach(cell => {
+            row.c.forEach((cell, idx) => {
               const td = document.createElement("td");
-              td.textContent = cell ? cell.v : "";
+              td.innerText = cell ? cell.v : "";
+              if (idx === 1) td.classList.add("work-operation");
               tr.appendChild(td);
             });
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
+          container.appendChild(table);
         })
-        .catch(error => {
-          console.error("Error fetching data:", error);
-          document.getElementById("data").innerHTML = `
-            <div style="color: red; font-size: 2vw;">❌ Failed to load data</div>`;
+        .catch((err) => {
+          document.getElementById("data").innerHTML =
+            `<div style="padding:20px;background:#f2f3ff;border:1px solid #ccc;color:red;font-size:1.5vw;text-align:center;">❌ Failed to load data</div>`;
         });
     }
 
-    // Initial load and refresh every 30 seconds
     fetchSheetData();
     setInterval(fetchSheetData, 30000);
   </script>
