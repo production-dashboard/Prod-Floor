@@ -9,14 +9,13 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #ffffff;
-      color: #000000;
+      background-color: white;
+      color: black;
     }
 
     h1 {
       text-align: center;
-      margin: 20px 0 10px;
-      font-size: 2rem;
+      margin: 20px 0;
     }
 
     .container {
@@ -29,54 +28,32 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      min-width: 1000px;
-      table-layout: auto;
+      min-width: 1200px;
     }
 
     th, td {
-      border: 1px solid #999;
-      padding: 8px;
+      border: 1px solid #888;
+      padding: 10px;
       text-align: center;
-      word-break: break-word;
+      white-space: pre-line;
     }
 
     th {
       background-color: #d3d3d3;
-      font-weight: bold;
     }
 
     tr:nth-child(even) {
-      background-color: #e9edf0;
-    }
-
-    tr:nth-child(odd) {
-      background-color: #f7f9fa;
+      background-color: #f4f4f4;
     }
 
     .error {
-      background-color: #fce4e4;
-      border: 1px solid #f5c2c2;
+      background-color: #fbe4e4;
       color: #b30000;
-      text-align: center;
       font-weight: bold;
       padding: 12px;
-      margin: 10px 0;
+      text-align: center;
+      margin-bottom: 10px;
       display: none;
-    }
-
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      th, td {
-        font-size: 12px;
-        padding: 6px;
-      }
-
-      table {
-        min-width: 800px;
-      }
     }
   </style>
 </head>
@@ -89,41 +66,39 @@
 
   <script>
     const sheetID = '1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20';
-    const sheetName = 'Sheet1';
 
     function fetchData() {
       Tabletop.init({
         key: sheetID,
-        callback: showData,
-        simpleSheet: false
+        callback: showInfo,
+        simpleSheet: true
       });
     }
 
-    function showData(data, tabletop) {
-      const sheet = data[sheetName]?.elements;
+    function showInfo(data) {
       const table = document.getElementById("data-table");
       const errorBox = document.getElementById("error-box");
+      table.innerHTML = "";
 
-      if (!sheet || sheet.length === 0) {
+      if (!data || data.length === 0) {
         errorBox.style.display = "block";
         return;
       }
 
       errorBox.style.display = "none";
-      table.innerHTML = "";
 
-      const headers = Object.keys(sheet[0]);
+      const headers = Object.keys(data[0]);
       const headerRow = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
       table.innerHTML += headerRow;
 
-      sheet.forEach(row => {
+      data.forEach(row => {
         const rowHTML = "<tr>" + headers.map(h => `<td>${row[h] || ''}</td>`).join("") + "</tr>";
         table.innerHTML += rowHTML;
       });
     }
 
     fetchData();
-    setInterval(fetchData, 60000); // Auto-refresh every 60s
+    setInterval(fetchData, 60000); // refresh every 60s
   </script>
 </body>
 </html>
