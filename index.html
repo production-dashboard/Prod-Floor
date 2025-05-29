@@ -2,79 +2,110 @@
 <html>
 <head>
   <title>Production Floor Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Tabletop.js/1.5.1/tabletop.min.js"></script>
   <style>
     body {
-      background-color: white;
-      color: black;
+      background-color: #f8f9fa;
+      color: #000;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 10px;
+      margin: 0;
     }
+
     h1 {
       text-align: center;
-      color: #000;
+      font-size: 2em;
     }
+
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 16px;
+      font-size: 14px;
+      min-width: 800px;
     }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 10px;
+      text-align: center;
+    }
+
     th {
-      background-color: #d9d9d9;
+      background-color: #d6d6d6;
       font-weight: bold;
-      border: 1px solid #999;
-      padding: 10px;
     }
-    td {
-      border: 1px solid #999;
-      padding: 10px;
+
+    tr:nth-child(even) {
+      background-color: #e9edf0;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #f6f8fa;
+    }
+
+    .error {
       background-color: #e6f0ff;
-    }
-    tr:nth-child(even) td {
-      background-color: #f2f2f2;
-    }
-    .bold {
+      border: 1px solid #ccc;
+      padding: 15px;
+      text-align: center;
+      color: red;
       font-weight: bold;
-    }
-    .highlight {
-      background-color: #fde9d9 !important;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <h1>📊 Production Floor Dashboard</h1>
-  <table id="data-table"></table>
+  <div class="table-container">
+    <div id="error-box" class="error" style="display:none;">❌ Failed to load data</div>
+    <table id="data-table"></table>
+  </div>
 
   <script>
-    const sheetID = "1_Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
-    const sheetName = "Sheet1";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+    const sheetID = '1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20';
+    const sheetName = 'Sheet1';
 
-    fetch(url)
-      .then(res => res.text())
-      .then(rep => {
-        const json = JSON.parse(rep.substr(47).slice(0, -2));
-        const table = document.getElementById("data-table");
-
-        const columns = json.table.cols.map(col => `<th>${col.label}</th>`).join("");
-        table.innerHTML += `<tr>${columns}</tr>`;
-
-        json.table.rows.forEach((row, rowIndex) => {
-          const isBold = [0,1,2,3,4,5,6,12,13,14].includes(rowIndex);
-          const isHighlight = [5].includes(rowIndex);
-          const rowData = row.c.map(cell => {
-            let content = cell && cell.v ? cell.v : "";
-            let className = isBold ? "bold" : "";
-            if (isHighlight) className += " highlight";
-            return `<td class="${className}">${content}</td>`;
-          }).join("");
-          table.innerHTML += `<tr>${rowData}</tr>`;
-        });
-      })
-      .catch(err => {
-        document.getElementById("data-table").innerHTML = "<tr><td colspan='100%'>❌ Failed to load data</td></tr>";
-        console.error("Data fetch error:", err);
+    function fetchData() {
+      Tabletop.init({
+        key: sheetID,
+        callback: showData,
+        simpleSheet: false
       });
+    }
+
+    function showData(data, tabletop) {
+      const sheet = data[sheetName]?.elements;
+      const table = document.getElementById("data-table");
+      const errorBox = document.getElementById("error-box");
+
+      if (!sheet || sheet.length === 0) {
+        errorBox.style.display = "block";
+        return;
+      }
+
+      errorBox.style.display = "none";
+      table.innerHTML = "";
+
+      const headers = Object.keys(sheet[0]);
+      const headerRow = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+      table.innerHTML += headerRow;
+
+      sheet.forEach(row => {
+        let rowHTML = "<tr>" + headers.map(h => `<td>${row[h] || ''}</td>`).join("") + "</tr>";
+        table.innerHTML += rowHTML;
+      });
+    }
+
+    fetchData();
+    setInterval(fetchData, 60000); // Refresh every 60 sec
   </script>
 </body>
 </html>
