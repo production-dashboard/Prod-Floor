@@ -1,115 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Production Floor Dashboard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      overflow: hidden;
+      font-family: Arial, sans-serif;
       background-color: #ffffff;
+      overflow: hidden;
     }
 
     h1 {
       text-align: center;
-      font-size: 3vw;
-      padding: 20px;
+      font-size: 2.5vw;
+      margin-top: 20px;
+    }
+
+    #data {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
     }
 
     table {
-      width: 100vw;
-      height: 100vh;
       border-collapse: collapse;
+      width: 98vw;
+      height: 85vh;
       table-layout: fixed;
-      transform: scale(1);
-      transform-origin: top left;
+      font-size: 0.85vw;
     }
 
-    th,
-    td {
+    th, td {
       border: 1px solid #ccc;
-      padding: 0.3vw;
+      padding: 5px;
       text-align: center;
-      font-size: 0.8vw;
-      word-break: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th {
-      background-color: #d3d3d3;
+      background-color: #e0e0e0;
       font-weight: bold;
     }
 
-    #data-container {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      padding: 0 1vw;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .error {
+      color: red;
+      font-size: 1.2em;
+      text-align: center;
+      padding: 20px;
+      background-color: #f5f5ff;
+      border: 1px solid #ccc;
+      margin: 20px auto;
+      width: fit-content;
     }
   </style>
 </head>
-
 <body>
   <h1>
-    <img src="https://img.icons8.com/color/48/000000/combo-chart--v1.png" alt="Dashboard Icon" style="vertical-align: middle;" />
-    Production Floor Dashboard
+    📊 Production Floor Dashboard
   </h1>
-  <div id="data-container">
-    <table id="data"></table>
+  <div id="data">
+    <div class="error" id="error" style="display:none;">❌ Failed to load data</div>
   </div>
 
   <script>
-    function fetchSheetData() {
+    async function fetchSheetData() {
       const sheetID = "1_Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
       const sheetName = "Sheet1";
       const query = encodeURIComponent("SELECT *");
       const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
-      fetch(url)
-        .then(response => response.text())
-        .then(dataText => {
-          const json = JSON.parse(dataText.substring(47).slice(0, -2));
-          const container = document.getElementById("data");
-          container.innerHTML = "";
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
 
-          const thead = document.createElement("thead");
-          const headerRow = document.createElement("tr");
-          json.table.cols.forEach(col => {
-            const th = document.createElement("th");
-            th.textContent = col.label;
-            headerRow.appendChild(th);
-          });
-          thead.appendChild(headerRow);
-          container.appendChild(thead);
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
 
-          const tbody = document.createElement("tbody");
-          json.table.rows.forEach(row => {
-            const tr = document.createElement("tr");
-            row.c.forEach(cell => {
-              const td = document.createElement("td");
-              td.textContent = cell ? cell.v : "";
-              tr.appendChild(td);
-            });
-            tbody.appendChild(tr);
-          });
-          container.appendChild(tbody);
-        })
-        .catch(error => {
-          const container = document.getElementById("data");
-          container.innerHTML = `<tr><td colspan="50" style="color: red; text-align: center; font-size: 1.5vw;">❌ Failed to load data</td></tr>`;
-          console.error("Error loading data:", error);
+        json.table.cols.forEach((col) => {
+          const th = document.createElement("th");
+          th.textContent = col.label;
+          headerRow.appendChild(th);
         });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        json.table.rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          row.c.forEach((cell) => {
+            const td = document.createElement("td");
+            td.textContent = cell ? cell.v : "";
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+
+        const container = document.getElementById("data");
+        container.innerHTML = "";
+        container.appendChild(table);
+      } catch (error) {
+        document.getElementById("error").style.display = "block";
+        console.error("Error loading data:", error);
+      }
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 60000); // refresh every 60 seconds
+    setInterval(fetchSheetData, 60000); // Refresh every 60 seconds
   </script>
 </body>
-
 </html>
