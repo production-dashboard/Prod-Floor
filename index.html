@@ -1,71 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Production Floor Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body {
+    body {
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      height: 100%;
-      width: 100%;
-      font-family: Arial, sans-serif;
-      background-color: white;
       overflow: hidden;
+      background-color: #ffffff;
     }
 
     h1 {
       text-align: center;
-      font-size: 2vw;
-      margin: 10px 0;
+      font-size: 3vw;
+      padding: 20px;
+    }
+
+    table {
+      width: 100vw;
+      height: 100vh;
+      border-collapse: collapse;
+      table-layout: fixed;
+      transform: scale(1);
+      transform-origin: top left;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 0.3vw;
+      text-align: center;
+      font-size: 0.8vw;
+      word-break: break-word;
+    }
+
+    th {
+      background-color: #d3d3d3;
+      font-weight: bold;
     }
 
     #data-container {
       width: 100vw;
-      height: 90vh;
+      height: 100vh;
+      overflow: hidden;
+      padding: 0 1vw;
       display: flex;
-      justify-content: center;
       align-items: center;
-    }
-
-    .table-wrapper {
-      max-width: 100vw;
-      max-height: 90vh;
-      overflow: auto;
-      transform: scale(0.85);
-      transform-origin: top left;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 0.9vw;
-      table-layout: fixed;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 4px 6px;
-      text-align: left;
-      word-wrap: break-word;
-    }
-
-    th {
-      background-color: #e0e0e0;
-    }
-
-    td {
-      background-color: #fdfdfd;
+      justify-content: center;
     }
   </style>
 </head>
+
 <body>
-  <h1>📊 Production Floor Dashboard</h1>
+  <h1>
+    <img src="https://img.icons8.com/color/48/000000/combo-chart--v1.png" alt="Dashboard Icon" style="vertical-align: middle;" />
+    Production Floor Dashboard
+  </h1>
   <div id="data-container">
-    <div class="table-wrapper">
-      <div id="data">Loading data...</div>
-    </div>
+    <table id="data"></table>
   </div>
 
   <script>
@@ -82,8 +78,6 @@
           const container = document.getElementById("data");
           container.innerHTML = "";
 
-          const table = document.createElement("table");
-
           const thead = document.createElement("thead");
           const headerRow = document.createElement("tr");
           json.table.cols.forEach(col => {
@@ -92,7 +86,7 @@
             headerRow.appendChild(th);
           });
           thead.appendChild(headerRow);
-          table.appendChild(thead);
+          container.appendChild(thead);
 
           const tbody = document.createElement("tbody");
           json.table.rows.forEach(row => {
@@ -104,17 +98,18 @@
             });
             tbody.appendChild(tr);
           });
-          table.appendChild(tbody);
-          container.appendChild(table);
+          container.appendChild(tbody);
         })
         .catch(error => {
-          document.getElementById("data").innerHTML = `<div style="color:red; font-size: 1.2vw;">❌ Failed to load data</div>`;
-          console.error("Data fetch error:", error);
+          const container = document.getElementById("data");
+          container.innerHTML = `<tr><td colspan="50" style="color: red; text-align: center; font-size: 1.5vw;">❌ Failed to load data</td></tr>`;
+          console.error("Error loading data:", error);
         });
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 60000);
+    setInterval(fetchSheetData, 60000); // refresh every 60 seconds
   </script>
 </body>
+
 </html>
