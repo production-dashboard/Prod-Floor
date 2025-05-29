@@ -9,63 +9,49 @@
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: white;
-    }
-
-    .table-wrapper {
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 0;
-      overflow: hidden;
+      min-height: 100vh;
+      background-color: white;
     }
-
     table {
       border-collapse: collapse;
-      font-size: 0.9vw;
+      font-size: 0.95vw;
       table-layout: fixed;
-      width: 95vw;
-      max-width: 100%;
+      width: 98vw;
+      max-height: 98vh;
     }
-
-    th,
-    td {
+    th, td {
       border: 1px solid #ccc;
-      padding: 5px;
-      text-align: left;
-      vertical-align: top;
-      word-wrap: break-word;
+      text-align: center;
+      padding: 0.4em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-
     th {
       background-color: #e0e0e0;
     }
-
+    th.wrap {
+      white-space: normal;
+      word-wrap: break-word;
+      font-size: 0.8vw;
+    }
     td:nth-child(2) {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 250px;
+      white-space: normal;
+      word-wrap: break-word;
+      text-align: left;
     }
-
-    tr td:first-child {
-      min-width: 25px;
-      text-align: center;
-    }
-
-    .title-row {
-      font-size: 1vw;
-      font-weight: bold;
-      text-align: center;
-      padding: 5px 0;
+    @media screen and (max-width: 600px) {
+      table {
+        font-size: 2vw;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="table-wrapper">
-    <table id="data"></table>
-  </div>
-
+  <div id="data"></div>
   <script>
     function fetchSheetData() {
       const sheetID = "1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
@@ -74,44 +60,48 @@
       const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
       fetch(url)
-        .then((res) => res.text())
-        .then((dataText) => {
-          const json = JSON.parse(dataText.substring(47).slice(0, -2));
-          const table = document.getElementById("data");
-          table.innerHTML = "";
-
+        .then(res => res.text())
+        .then(rep => {
+          const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
+          const table = document.createElement("table");
           const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          const headers = jsonData.table.cols.map(col => col.label || "");
           const headerRow = document.createElement("tr");
 
-          json.table.cols.forEach((col) => {
+          headers.forEach((header, idx) => {
             const th = document.createElement("th");
-            th.innerText = col.label;
+            th.textContent = header;
+            if (idx >= 2) th.classList.add("wrap");
             headerRow.appendChild(th);
           });
-
           thead.appendChild(headerRow);
-          table.appendChild(thead);
 
-          const tbody = document.createElement("tbody");
-          json.table.rows.forEach((row) => {
+          jsonData.table.rows.forEach(row => {
             const tr = document.createElement("tr");
-            row.c.forEach((cell, index) => {
+            row.c.forEach((cell, i) => {
               const td = document.createElement("td");
-              td.innerText = cell ? cell.v : "";
+              td.textContent = cell ? cell.v : "";
               tr.appendChild(td);
             });
             tbody.appendChild(tr);
           });
 
+          table.appendChild(thead);
           table.appendChild(tbody);
+          const container = document.getElementById("data");
+          container.innerHTML = "";
+          container.appendChild(table);
         })
-        .catch((error) => {
-          console.error("Failed to fetch data", error);
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          document.getElementById("data").innerHTML = "<p style='color:red;'>⚠️ Failed to load data</p>";
         });
     }
 
     fetchSheetData();
-    setInterval(fetchSheetData, 30000); // Auto-refresh every 30 seconds
+    setInterval(fetchSheetData, 60 * 1000); // Auto-refresh every minute
   </script>
 </body>
 </html>
