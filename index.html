@@ -4,14 +4,14 @@
   <title>Production Floor Dashboard</title>
   <style>
     body {
-      background-color: #0b0c10;
-      color: #fff;
+      background-color: white;
+      color: black;
       font-family: Arial, sans-serif;
       padding: 20px;
     }
     h1 {
       text-align: center;
-      color: #66fcf1;
+      color: #000;
     }
     table {
       width: 100%;
@@ -19,19 +19,25 @@
       margin-top: 20px;
       font-size: 16px;
     }
-    th, td {
-      border: 1px solid #45a29e;
-      padding: 10px;
-      text-align: center;
-    }
     th {
-      background-color: #1f2833;
+      background-color: #d9d9d9;
+      font-weight: bold;
+      border: 1px solid #999;
+      padding: 10px;
     }
-    tr:nth-child(even) {
-      background-color: #0b0c10;
+    td {
+      border: 1px solid #999;
+      padding: 10px;
+      background-color: #e6f0ff;
     }
-    tr:nth-child(odd) {
-      background-color: #1f2833;
+    tr:nth-child(even) td {
+      background-color: #f2f2f2;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    .highlight {
+      background-color: #fde9d9 !important;
     }
   </style>
 </head>
@@ -53,8 +59,15 @@
         const columns = json.table.cols.map(col => `<th>${col.label}</th>`).join("");
         table.innerHTML += `<tr>${columns}</tr>`;
 
-        json.table.rows.forEach(row => {
-          const rowData = row.c.map(cell => `<td>${cell ? cell.v : ""}</td>`).join("");
+        json.table.rows.forEach((row, rowIndex) => {
+          const isBold = [0,1,2,3,4,5,6,12,13,14].includes(rowIndex);
+          const isHighlight = [5].includes(rowIndex);
+          const rowData = row.c.map(cell => {
+            let content = cell && cell.v ? cell.v : "";
+            let className = isBold ? "bold" : "";
+            if (isHighlight) className += " highlight";
+            return `<td class="${className}">${content}</td>`;
+          }).join("");
           table.innerHTML += `<tr>${rowData}</tr>`;
         });
       })
