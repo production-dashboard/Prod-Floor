@@ -41,42 +41,48 @@
       tr:nth-child(even) {
         background-color: #f9f9f9;
       }
-    </style>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['table']});
-      google.charts.setOnLoadCallback(drawTable);
 
-      function drawTable() {
-        const queryString = encodeURIComponent('SELECT *');
-        const sheetID = '1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20';
-        const gid = '0'; // Sheet1
-        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=Sheet1&tq=${queryString}`;
+      .error {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+        background: #f2f3ff;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 20px;
+      }
+    </style>
+    <script>
+      function fetchSheetData() {
+        const sheetID = "1Vc7mz61QKlFujIlfmgkz7XW578bOLg3Gs8ZrnyOc20";
+        const sheetName = "Sheet1";
+        const query = encodeURIComponent("SELECT *");
+        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
 
         fetch(url)
-          .then(res => res.text())
-          .then(rep => {
-            const jsonData = JSON.parse(rep.substr(47).slice(0, -2));
-            const table = document.createElement('table');
-            const container = document.getElementById('data');
-            container.innerHTML = '';
+          .then(response => response.text())
+          .then(dataText => {
+            const json = JSON.parse(dataText.substring(47).slice(0, -2));
+            const container = document.getElementById("data");
+            const table = document.createElement("table");
+            container.innerHTML = "";
 
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            jsonData.table.cols.forEach(col => {
-              const th = document.createElement('th');
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            json.table.cols.forEach(col => {
+              const th = document.createElement("th");
               th.textContent = col.label;
               headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
-            const tbody = document.createElement('tbody');
-            jsonData.table.rows.forEach(row => {
-              const tr = document.createElement('tr');
+            const tbody = document.createElement("tbody");
+            json.table.rows.forEach(row => {
+              const tr = document.createElement("tr");
               row.c.forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = (cell && cell.v) || '';
+                const td = document.createElement("td");
+                td.textContent = (cell && cell.v) || "";
                 tr.appendChild(td);
               });
               tbody.appendChild(tr);
@@ -85,17 +91,18 @@
             table.appendChild(tbody);
             container.appendChild(table);
           })
-          .catch(err => {
-            document.getElementById('data').innerHTML = `<p style="color:red; font-weight:bold;">❌ Failed to load data</p>`;
-            console.error('Error loading sheet:', err);
+          .catch(error => {
+            document.getElementById("data").innerHTML =
+              '<div class="error">❌ Failed to load data</div>';
+            console.error("Sheet error:", error);
           });
       }
+
+      window.onload = fetchSheetData;
     </script>
   </head>
   <body>
     <h1>📊 Production Floor Dashboard</h1>
-    <div class="container" id="data">
-      Loading data...
-    </div>
+    <div class="container" id="data">Loading data...</div>
   </body>
 </html>
